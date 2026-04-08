@@ -1,0 +1,174 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model Pokemon {
+  id            Int     @id @default(autoincrement())
+  dexNumber     Int     @unique
+  name          String  @unique
+  slug          String  @unique
+  description   String
+  baseHp        Int
+  baseAtk       Int
+  baseDef       Int
+  baseSpAtk     Int
+  baseSpDef     Int
+  baseSpeed     Int
+  baseTotal     Int
+  height        Float
+  weight        Float
+  imageUrl      String
+  shinyImageUrl String?
+  category      String  @default("Pokémon")
+
+  types       PokemonType[]
+  abilities   PokemonAbility[]
+  locations   PokemonLocation[]
+  evolvesFrom Evolution[]      @relation("EvolutionTarget")
+  evolvesInto Evolution[]      @relation("EvolutionSource")
+  moves       PokemonMove[]
+  eggGroups   PokemonEggGroup[]
+}
+
+model Type {
+  id        Int    @id @default(autoincrement())
+  name      String @unique
+  color     String
+  textColor String @default("#FFFFFF")
+
+  pokemon        PokemonType[]
+  moves          Move[]
+  offensiveChart TypeMatchup[] @relation("AttackingType")
+  defensiveChart TypeMatchup[] @relation("DefendingType")
+}
+
+model TypeMatchup {
+  id              Int   @id @default(autoincrement())
+  attackingTypeId Int
+  defendingTypeId Int
+  multiplier      Float
+
+  attackingType Type @relation("AttackingType", fields: [attackingTypeId], references: [id])
+  defendingType Type @relation("DefendingType", fields: [defendingTypeId], references: [id])
+
+  @@unique([attackingTypeId, defendingTypeId])
+}
+
+model PokemonType {
+  pokemonId Int
+  typeId    Int
+  slot      Int
+
+  pokemon Pokemon @relation(fields: [pokemonId], references: [id])
+  type    Type    @relation(fields: [typeId], references: [id])
+
+  @@id([pokemonId, typeId])
+}
+
+model Ability {
+  id          Int    @id @default(autoincrement())
+  name        String @unique
+  description String
+
+  pokemon PokemonAbility[]
+}
+
+model PokemonAbility {
+  pokemonId Int
+  abilityId Int
+  slot      Int
+  isHidden  Boolean @default(false)
+
+  pokemon Pokemon @relation(fields: [pokemonId], references: [id])
+  ability Ability @relation(fields: [abilityId], references: [id])
+
+  @@id([pokemonId, abilityId])
+}
+
+model Location {
+  id          Int     @id @default(autoincrement())
+  name        String  @unique
+  description String?
+  areaType    String
+
+  pokemon PokemonLocation[]
+}
+
+model PokemonLocation {
+  id            Int     @id @default(autoincrement())
+  pokemonId     Int
+  locationId    Int
+  encounterType String
+  rarity        String
+  minLevel      Int
+  maxLevel      Int
+  conditions    String?
+
+  pokemon  Pokemon  @relation(fields: [pokemonId], references: [id])
+  location Location @relation(fields: [locationId], references: [id])
+}
+
+model Evolution {
+  id            Int     @id @default(autoincrement())
+  fromPokemonId Int
+  toPokemonId   Int
+  method        String
+  trigger       String?
+  requiredLevel Int?
+  requiredItem  String?
+  timeOfDay     String?
+  locationName  String?
+  notes         String?
+
+  fromPokemon Pokemon @relation("EvolutionSource", fields: [fromPokemonId], references: [id])
+  toPokemon   Pokemon @relation("EvolutionTarget", fields: [toPokemonId], references: [id])
+}
+
+model Move {
+  id          Int    @id @default(autoincrement())
+  name        String @unique
+  typeId      Int
+  category    String
+  power       Int?
+  accuracy    Int?
+  pp          Int
+  description String
+
+  type      Type          @relation(fields: [typeId], references: [id])
+  learnedBy PokemonMove[]
+}
+
+model PokemonMove {
+  id          Int     @id @default(autoincrement())
+  pokemonId   Int
+  moveId      Int
+  learnMethod String
+  learnLevel  Int?
+  tmNumber    Int?
+
+  pokemon Pokemon @relation(fields: [pokemonId], references: [id])
+  move    Move    @relation(fields: [moveId], references: [id])
+
+  @@unique([pokemonId, moveId, learnMethod, learnLevel])
+}
+
+model EggGroup {
+  id   Int    @id @default(autoincrement())
+  name String @unique
+
+  pokemon PokemonEggGroup[]
+}
+
+model PokemonEggGroup {
+  pokemonId  Int
+  eggGroupId Int
+
+  pokemon  Pokemon  @relation(fields: [pokemonId], references: [id])
+  eggGroup EggGroup @relation(fields: [eggGroupId], references: [id])
+
+  @@id([pokemonId, eggGroupId])
+}

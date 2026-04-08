@@ -1,0 +1,7 @@
+{
+  "//": "Optional height/weight overrides (meters/kg). Key by slug, source ID string, or normalized name.",
+  "bulbasaur": {
+    "height": 0.7,
+    "weight": 6.9
+  }
+}
