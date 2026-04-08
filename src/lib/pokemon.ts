@@ -80,6 +80,22 @@ export async function getPokemonBySlug(slug: string): Promise<PokemonDetail | nu
   return pokemon as unknown as PokemonDetail | null;
 }
 
+/** Lightweight lookup for nav theming on Pokémon routes. */
+export async function getPokemonTypesForSlug(
+  slug: string,
+): Promise<{ slot: number; type: { color: string } }[] | null> {
+  const row = await prisma.pokemon.findUnique({
+    where: { slug },
+    select: {
+      types: {
+        include: { type: { select: { color: true } } },
+        orderBy: { slot: "asc" },
+      },
+    },
+  });
+  return row?.types ?? null;
+}
+
 export async function searchPokemon(
   q: string,
   typeFilter?: string[]

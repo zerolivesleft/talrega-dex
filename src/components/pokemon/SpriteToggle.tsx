@@ -2,18 +2,27 @@
 
 import { useState } from "react";
 import { Sparkles } from "lucide-react";
+import { pokemonSpriteFrameBackground } from "@/lib/typeGradient";
 import { PokemonSprite } from "./PokemonSprite";
 
 interface SpriteToggleProps {
   normalSrc: string;
   shinySrc: string | null;
   alt: string;
-  typeColor: string;
+  typePrimaryColor: string;
+  typeSecondaryColor: string;
   /** Smaller frame for sticky / compact headers */
   compact?: boolean;
 }
 
-export function SpriteToggle({ normalSrc, shinySrc, alt, typeColor, compact = false }: SpriteToggleProps) {
+export function SpriteToggle({
+  normalSrc,
+  shinySrc,
+  alt,
+  typePrimaryColor,
+  typeSecondaryColor,
+  compact = false,
+}: SpriteToggleProps) {
   const [shiny, setShiny] = useState(false);
   const src = shiny && shinySrc ? shinySrc : normalSrc;
 
@@ -23,7 +32,7 @@ export function SpriteToggle({ normalSrc, shinySrc, alt, typeColor, compact = fa
         className={`relative flex flex-col justify-end overflow-hidden rounded-xl transition-[width,height] duration-200 ease-out ${
           compact ? "h-12 w-12 md:h-14 md:w-14" : "h-44 w-44 md:h-56 md:w-56"
         }`}
-        style={{ backgroundColor: shiny ? "#f5a62318" : `${typeColor}18` }}
+        style={pokemonSpriteFrameBackground(typePrimaryColor, typeSecondaryColor, shiny)}
       >
         <div className="relative mx-auto h-[90%] w-[90%] shrink-0">
           <PokemonSprite

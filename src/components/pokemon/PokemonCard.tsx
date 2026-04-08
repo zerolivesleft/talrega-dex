@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { getPokemonTypePairColors, pokemonHeroHeaderGradient } from "@/lib/typeGradient";
 import { padDexNumber, statColor } from "@/lib/utils";
 import { TypeBadge } from "./TypeBadge";
 import { PokemonSprite } from "./PokemonSprite";
@@ -16,15 +17,14 @@ interface PokemonCardProps {
 }
 
 export function PokemonCard({ pokemon }: PokemonCardProps) {
-  const primaryType = pokemon.types.find((t) => t.slot === 1)?.type;
-  const typeColor = primaryType?.color ?? "#A8A878";
+  const { primary, secondary } = getPokemonTypePairColors(pokemon.types);
 
   return (
     <Link href={`/pokemon/${pokemon.slug}`} className="group block">
       <div
-        className="relative overflow-hidden rounded-2xl border border-white/8 transition-all duration-200 ease-out group-hover:scale-[1.03] group-hover:shadow-[0_8px_30px_rgba(0,0,0,0.5)]"
+        className="relative overflow-hidden rounded-2xl border border-white/10 transition-all duration-200 ease-out group-hover:scale-[1.03] group-hover:shadow-[0_8px_30px_rgba(0,0,0,0.5)]"
         style={{
-          background: `linear-gradient(135deg, ${typeColor}33 0%, #16213e 60%)`,
+          backgroundImage: pokemonHeroHeaderGradient(primary, secondary),
         }}
       >
         {/* Dex number */}

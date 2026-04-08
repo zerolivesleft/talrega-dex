@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { getPokemonBySlug, getAllSlugs, getAdjacentPokemon } from "@/lib/pokemon";
 import { getPokemonHeroSubtext, isPlaceholderDexDescription } from "@/lib/pokemonTagline";
+import { getPokemonTypePairColors, pokemonTypeThemedCardStyle, pokemonPageBackgroundStyle } from "@/lib/typeGradient";
 import { padDexNumber } from "@/lib/utils";
 import { StatBar } from "@/components/pokemon/StatBar";
 import { AbilityList } from "@/components/pokemon/AbilityList";
@@ -31,12 +32,30 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     isPlaceholderDexDescription(pokemon.description) ?
       `${pokemon.name} (#${pokemon.dexNumber}) in the Talrega Pokédex — stats, moves, locations, and evolution.`
     : pokemon.description;
-  return { title: pokemon.name, description: blurb };
+  const path = `/pokemon/${slug}`;
+  return {
+    title: pokemon.name,
+    description: blurb,
+    openGraph: {
+      title: `${pokemon.name} | Talrega Pokédex`,
+      description: blurb,
+      type: "website",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: pokemon.name,
+      description: blurb,
+    },
+    alternates: { canonical: path },
+  };
 }
 
-function SectionHeading({ children }: { children: React.ReactNode }) {
+function SectionHeading({ children, accentColor }: { children: React.ReactNode; accentColor: string }) {
   return (
-    <h2 className="text-xs font-bold uppercase tracking-widest text-[#8892a4] mb-4 pb-2 border-b border-white/8">
+    <h2
+      className="text-xs font-bold uppercase tracking-widest text-[#8892a4] mb-4 pb-2 border-b"
+      style={{ borderColor: `${accentColor}38` }}
+    >
       {children}
     </h2>
   );
@@ -49,8 +68,8 @@ export default async function PokemonPage({ params }: Props) {
 
   const { prev, next } = await getAdjacentPokemon(pokemon.dexNumber);
 
-  const primaryType = pokemon.types.find((t) => t.slot === 1)?.type;
-  const typeColor = primaryType?.color ?? "#A8A878";
+  const { primary: typePrimaryColor, secondary: typeSecondaryColor } = getPokemonTypePairColors(pokemon.types);
+  const cardStyle = pokemonTypeThemedCardStyle(typePrimaryColor, typeSecondaryColor);
 
   const heroSub = getPokemonHeroSubtext(pokemon);
 
@@ -64,19 +83,19 @@ export default async function PokemonPage({ params }: Props) {
     { label: "baseTotal", value: pokemon.baseTotal },
   ];
 
-  return (
-    <PageContainer className="space-y-6 pb-16">
-      {/* Back button */}
-      <Link
-        href="/"
-        className="inline-flex items-center gap-1 text-sm text-[#8892a4] transition-colors hover:text-[#eaeaea]"
-      >
-        <ChevronLeft size={16} />
-        Back to Pokédex
-      </Link>
+  const pageBg = pokemonPageBackgroundStyle(typePrimaryColor, typeSecondaryColor);
 
+  return (
+    <div className="relative min-h-screen">
+      <div
+        className="pointer-events-none absolute inset-0 -z-10"
+        style={pageBg}
+        aria-hidden
+      />
+      <PageContainer className="space-y-6 !pt-0 pb-16">
       <PokemonDetailStickyHero
-        typeColor={typeColor}
+        typePrimaryColor={typePrimaryColor}
+        typeSecondaryColor={typeSecondaryColor}
         name={pokemon.name}
         dexNumber={pokemon.dexNumber}
         imageUrl={pokemon.imageUrl}
@@ -97,8 +116,8 @@ export default async function PokemonPage({ params }: Props) {
       {/* Two-column layout on desktop */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         {/* Base Stats */}
-        <div className="rounded-2xl border border-white/8 bg-[#16213e] p-6">
-          <SectionHeading>Base Stats</SectionHeading>
+        <div className="rounded-2xl border p-6" style={cardStyle}>
+          <SectionHeading accentColor={typePrimaryColor}>Base Stats</SectionHeading>
           <div className="space-y-3">
             {stats.map(({ label, value }) => (
               <StatBar key={label} label={label} value={value} max={label === "baseTotal" ? 720 : 255} />
@@ -107,12 +126,12 @@ export default async function PokemonPage({ params }: Props) {
         </div>
 
         {/* Abilities */}
-        <div className="rounded-2xl border border-white/8 bg-[#16213e] p-6">
-          <SectionHeading>Abilities</SectionHeading>
+        <div className="rounded-2xl border p-6" style={cardStyle}>
+          <SectionHeading accentColor={typePrimaryColor}>Abilities</SectionHeading>
           <AbilityList abilities={pokemon.abilities} />
           {pokemon.eggGroups.length > 0 && (
             <div className="mt-5">
-              <SectionHeading>Egg Groups</SectionHeading>
+              <SectionHeading accentColor={typePrimaryColor}>Egg Groups</SectionHeading>
               <div className="flex gap-2 flex-wrap">
                 {pokemon.eggGroups.map(({ eggGroup }) => (
                   <span key={eggGroup.id} className="rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-sm text-[#eaeaea]">
@@ -126,14 +145,14 @@ export default async function PokemonPage({ params }: Props) {
       </div>
 
       {/* Evolution */}
-      <div className="rounded-2xl border border-white/8 bg-[#16213e] p-6">
-        <SectionHeading>Evolution</SectionHeading>
+      <div className="rounded-2xl border p-6" style={cardStyle}>
+        <SectionHeading accentColor={typePrimaryColor}>Evolution</SectionHeading>
         <EvolutionChain pokemon={pokemon} />
       </div>
 
       {/* Locations */}
-      <div className="rounded-2xl border border-white/8 bg-[#16213e] p-6">
-        <SectionHeading>Locations</SectionHeading>
+      <div className="rounded-2xl border p-6" style={cardStyle}>
+        <SectionHeading accentColor={typePrimaryColor}>Locations</SectionHeading>
         <LocationTable
           locations={pokemon.locations}
           evolveFrom={pokemon.evolvesFrom.map((e) => ({
@@ -144,14 +163,15 @@ export default async function PokemonPage({ params }: Props) {
       </div>
 
       {/* Moves */}
-      <div className="rounded-2xl border border-white/8 bg-[#16213e] p-6">
-        <SectionHeading>Moves</SectionHeading>
+      <div className="rounded-2xl border p-6" style={cardStyle}>
+        <SectionHeading accentColor={typePrimaryColor}>Moves</SectionHeading>
         <MoveTable moves={pokemon.moves} />
       </div>
 
       {/* Prev / next by dex */}
       <nav
-        className="grid grid-cols-2 gap-3 rounded-2xl border border-white/8 bg-[#16213e] p-4"
+        className="grid grid-cols-2 gap-3 rounded-2xl border p-4"
+        style={cardStyle}
         aria-label="Previous and next Pokémon"
       >
         {prev ? (
@@ -208,5 +228,6 @@ export default async function PokemonPage({ params }: Props) {
         )}
       </nav>
     </PageContainer>
+    </div>
   );
 }

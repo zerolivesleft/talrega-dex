@@ -17,9 +17,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const data = await getAbilityBySlug(slug);
   if (!data) return {};
+  const title = `${data.name} — Ability`;
   return {
-    title: `${data.name} — Ability`,
+    title,
     description: data.description,
+    openGraph: { title, description: data.description, type: "website" },
+    twitter: { card: "summary_large_image", title, description: data.description },
+    alternates: { canonical: `/ability/${slug}` },
   };
 }
 

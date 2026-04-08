@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { cn, padDexNumber } from "@/lib/utils";
+import { pokemonHeroHeaderGradient, pokemonStickyHeaderCompactBg } from "@/lib/typeGradient";
 import { TypeBadge } from "./TypeBadge";
 import { SpriteToggle } from "./SpriteToggle";
 import type { PokemonDetail } from "@/lib/types";
@@ -13,7 +14,8 @@ function clamp(n: number, min: number, max: number) {
 }
 
 type Props = {
-  typeColor: string;
+  typePrimaryColor: string;
+  typeSecondaryColor: string;
   name: string;
   dexNumber: number;
   imageUrl: string;
@@ -26,7 +28,8 @@ type Props = {
 };
 
 export function PokemonDetailStickyHero({
-  typeColor,
+  typePrimaryColor,
+  typeSecondaryColor,
   name,
   dexNumber,
   imageUrl,
@@ -106,13 +109,14 @@ export function PokemonDetailStickyHero({
           "w-full border rounded-none",
           isMd && "transition-[border-color,background-color,box-shadow] duration-200 ease-out",
           attachedToNav
-            ? "border-x border-b border-white/12 bg-[#16213e]/90 shadow-[0_12px_40px_rgba(0,0,0,0.45)] md:backdrop-blur-md md:supports-[backdrop-filter]:bg-[#16213e]/78"
+            ? "border-x border-b border-white/12 shadow-[0_12px_40px_rgba(0,0,0,0.45)] md:backdrop-blur-md"
             : "border border-white/8",
         )}
-        style={{
-          backgroundImage:
-            p < 0.92 ? `linear-gradient(135deg, ${typeColor}22 0%, #16213e 55%)` : undefined,
-        }}
+        style={
+          attachedToNav
+            ? pokemonStickyHeaderCompactBg(typePrimaryColor, typeSecondaryColor)
+            : { backgroundImage: pokemonHeroHeaderGradient(typePrimaryColor, typeSecondaryColor) }
+        }
       >
         <div
           className="mx-auto max-w-7xl"
@@ -140,7 +144,8 @@ export function PokemonDetailStickyHero({
               normalSrc={imageUrl}
               shinySrc={shinyImageUrl}
               alt={name}
-              typeColor={typeColor}
+              typePrimaryColor={typePrimaryColor}
+              typeSecondaryColor={typeSecondaryColor}
               compact={isMd && p > 0.45}
             />
 

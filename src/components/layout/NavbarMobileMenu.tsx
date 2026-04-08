@@ -2,18 +2,14 @@
 
 import * as Dialog from "@radix-ui/react-dialog";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
 import { useState } from "react";
+import { isMainNavActive, MAIN_NAV_LINKS } from "@/components/layout/mainNav";
 import { cn } from "@/lib/utils";
 
-const links = [
-  { href: "/", label: "Pokédex" },
-  { href: "/abilities", label: "Abilities" },
-  { href: "/type-chart", label: "Type Chart" },
-  { href: "/moves", label: "Moves" },
-] as const;
-
 export function NavbarMobileMenu() {
+  const pathname = usePathname() ?? "";
   const [open, setOpen] = useState(false);
 
   return (
@@ -67,17 +63,26 @@ export function NavbarMobileMenu() {
             Site sections: Pokédex, abilities, type chart, and moves.
           </Dialog.Description>
           <nav className="flex flex-col gap-0.5 overflow-y-auto p-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-3">
-            {links.map(({ href, label }, i) => (
-              <Dialog.Close asChild key={href}>
-                <Link
-                  href={href}
-                  className="rounded-lg px-4 py-3.5 text-base font-medium text-[#eaeaea] transition-[transform,opacity,background-color] duration-200 animate-in fade-in slide-in-from-left-2 hover:bg-white/5 active:bg-white/10"
-                  style={{ animationDelay: `${Math.min(i, 5) * 40}ms`, animationFillMode: "backwards" }}
-                >
-                  {label}
-                </Link>
-              </Dialog.Close>
-            ))}
+            {MAIN_NAV_LINKS.map(({ href, label }, i) => {
+              const active = isMainNavActive(pathname, href);
+              return (
+                <Dialog.Close asChild key={href}>
+                  <Link
+                    href={href}
+                    aria-current={active ? "page" : undefined}
+                    className={cn(
+                      "rounded-lg px-4 py-3.5 text-base transition-[transform,opacity,background-color] duration-200 animate-in fade-in slide-in-from-left-2",
+                      active
+                        ? "bg-white/12 font-semibold text-[#eaeaea]"
+                        : "font-medium text-[#8892a4] hover:bg-white/5 hover:text-[#eaeaea] active:bg-white/10",
+                    )}
+                    style={{ animationDelay: `${Math.min(i, 5) * 40}ms`, animationFillMode: "backwards" }}
+                  >
+                    {label}
+                  </Link>
+                </Dialog.Close>
+              );
+            })}
           </nav>
           <p className="border-t border-white/8 px-4 py-3 text-center text-[11px] text-[#8892a4]">
             Use the search field for Pokémon, moves, and abilities.

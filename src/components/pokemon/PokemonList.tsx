@@ -1,11 +1,22 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { ChevronDown } from "lucide-react";
 import { abilitySlug, padDexNumber, statColor } from "@/lib/utils";
+import { pokemonRowTypeGradientStyle } from "@/lib/typeGradient";
 import { TypeBadge } from "./TypeBadge";
 import { PokemonSprite } from "./PokemonSprite";
 import type { PokemonListItem, SortKey } from "@/lib/types";
+
+/** Clicks on ability links must not navigate to the Pokémon page. */
+function isAbilityLinkClick(target: EventTarget | null): boolean {
+  const el = target as HTMLElement | null;
+  if (!el) return false;
+  const a = el.closest("a[href]");
+  if (!a) return false;
+  return (a.getAttribute("href") ?? "").startsWith("/ability");
+}
 
 const STAT_COLS: { key: SortKey; statKey: keyof PokemonListItem; label: string }[] = [
   { key: "hp",    statKey: "baseHp",    label: "HP"  },
@@ -46,6 +57,8 @@ function SortableHeader({ label, sortKey, activeKey, onSort }: {
 }
 
 export function PokemonList({ pokemon, sortKey, onSort }: PokemonListProps) {
+  const router = useRouter();
+
   if (pokemon.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-center">
@@ -89,23 +102,40 @@ export function PokemonList({ pokemon, sortKey, onSort }: PokemonListProps) {
           {pokemon.map((p) => (
             <tr
               key={p.id}
-              className="border-b border-white/5 last:border-0 transition-colors hover:bg-white/5 group"
+              style={pokemonRowTypeGradientStyle(p.types)}
+              className="border-b border-white/5 last:border-0 transition-colors hover:bg-white/[0.06] group cursor-pointer focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-[#e94560]/70"
+              tabIndex={0}
+              role="link"
+              aria-label={`Open ${p.name} Pokédex entry`}
+              onClick={(e) => {
+                if (isAbilityLinkClick(e.target)) return;
+                router.push(`/pokemon/${p.slug}`);
+              }}
+              onAuxClick={(e) => {
+                if (e.button !== 1) return;
+                if (isAbilityLinkClick(e.target)) return;
+                e.preventDefault();
+                window.open(`/pokemon/${p.slug}`, "_blank", "noopener,noreferrer");
+              }}
+              onKeyDown={(e) => {
+                if (e.key !== "Enter" && e.key !== " ") return;
+                if (isAbilityLinkClick(e.target)) return;
+                e.preventDefault();
+                router.push(`/pokemon/${p.slug}`);
+              }}
             >
               <td className="px-4 py-2">
                 <span className="font-mono text-xs text-[#8892a4]">{padDexNumber(p.dexNumber)}</span>
               </td>
               <td className="px-2 py-2">
-                <div className="relative w-10 h-10">
-                  <PokemonSprite src={p.imageUrl} alt={p.name} fill className="object-contain" sizes="40px" />
+                <div className="relative w-10 h-10 pointer-events-none">
+                  <PokemonSprite src={p.imageUrl} alt="" fill className="object-contain" sizes="40px" />
                 </div>
               </td>
               <td className="px-4 py-2">
-                <Link
-                  href={`/pokemon/${p.slug}`}
-                  className="font-semibold text-[#eaeaea] group-hover:text-white transition-colors text-sm"
-                >
+                <span className="font-semibold text-[#eaeaea] group-hover:text-white transition-colors text-sm">
                   {p.name}
-                </Link>
+                </span>
               </td>
               <td className="px-4 py-2 hidden md:table-cell">
                 <div className="flex gap-1.5 flex-wrap">
