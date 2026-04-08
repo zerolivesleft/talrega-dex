@@ -33,10 +33,6 @@ export const metadata: Metadata = {
     "The complete Pokédex for Pokémon Odyssey — explore every Pokémon in the Talrega region, their moves, locations, and evolutions.",
   keywords: siteKeywords,
   applicationName: "Talrega Pokédex",
-  icons: {
-    icon: "/images/logo-pokeball.png",
-    apple: "/images/logo-pokeball.png",
-  },
   openGraph: defaultOpenGraph,
   twitter: defaultTwitter,
   robots: { index: true, follow: true },
