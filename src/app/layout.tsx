@@ -9,6 +9,7 @@ import {
   rootMetadataBase,
   siteKeywords,
 } from "@/lib/metadataShared";
+import { Analytics } from "@vercel/analytics/next";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -56,6 +57,7 @@ export default function RootLayout({
             Fan-made, not affiliated with Nintendo or Game Freak
           </p>
         </footer>
+        <Analytics />
       </body>
     </html>
   );
