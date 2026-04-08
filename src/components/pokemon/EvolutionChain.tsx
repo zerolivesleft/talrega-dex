@@ -9,7 +9,7 @@ function PokemonNode({ pokemon, isCurrent }: { pokemon: EvoMon; isCurrent?: bool
   return (
     <Link
       href={`/pokemon/${pokemon.slug}`}
-      className={`group flex flex-col items-center gap-1.5 rounded-xl border p-3 transition-colors hover:bg-white/5 min-w-[80px] max-w-[110px] ${
+      className={`group flex min-w-[80px] max-w-[110px] shrink-0 flex-col items-center gap-1.5 rounded-xl border p-3 transition-colors hover:bg-white/5 ${
         isCurrent ? "border-[#e94560]/40 bg-[#e94560]/5" : "border-white/8"
       }`}
     >
@@ -51,10 +51,15 @@ function CompactPokemonNode({ pokemon, isCurrent }: { pokemon: EvoMon; isCurrent
 
 function Arrow({ trigger }: { trigger: string | null }) {
   return (
-    <div className="flex flex-col items-center gap-1 px-1 shrink-0">
-      <span className="text-[#8892a4] text-xl leading-none">→</span>
+    <div className="flex w-full max-w-[min(18rem,calc(100vw-3rem))] shrink-0 flex-col items-center gap-1 px-2 py-2 md:w-auto md:max-w-[11rem] md:px-1 md:py-0">
+      <span className="text-[#8892a4] text-xl leading-none md:hidden" aria-hidden>
+        ↓
+      </span>
+      <span className="hidden text-[#8892a4] text-xl leading-none md:inline" aria-hidden>
+        →
+      </span>
       {trigger && (
-        <span className="max-w-[min(11rem,calc(100vw-2rem))] rounded-full border border-white/10 bg-white/5 px-3 py-0.5 text-center text-[11px] leading-snug text-[#8892a4] [overflow-wrap:anywhere]">
+        <span className="w-full rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-center text-[10px] leading-snug text-[#8892a4] [overflow-wrap:anywhere] md:w-auto md:px-3 md:text-[11px]">
           {trigger}
         </span>
       )}
@@ -168,11 +173,14 @@ export function EvolutionChain({ pokemon }: { pokemon: PokemonDetail }) {
     const notes = pokemon.evolvesInto.filter((e) => e.notes);
 
     return (
-      <div className="w-full overflow-x-auto">
+      <div className="w-full min-w-0 md:overflow-x-auto">
         <div className="flex justify-center py-2">
-          <div className="flex min-w-fit items-center gap-0">
+          <div className="flex w-full min-w-0 flex-col items-center md:w-auto md:min-w-fit md:flex-row md:items-center md:gap-0">
             {segments.map((seg, i) => (
-              <div key={seg.mon.slug} className="flex items-center gap-0">
+              <div
+                key={seg.mon.slug}
+                className="flex w-full min-w-0 flex-col items-center md:w-auto md:flex-row md:items-center md:gap-0"
+              >
                 <PokemonNode pokemon={seg.mon} isCurrent={seg.isCurrent} />
                 {i < segments.length - 1 && <Arrow trigger={seg.trigger} />}
               </div>
