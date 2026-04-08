@@ -8,7 +8,11 @@ interface SearchBarProps {
   placeholder?: string;
 }
 
-export function SearchBar({ value, onChange, placeholder = "Search by name, #, or ability..." }: SearchBarProps) {
+export function SearchBar({
+  value,
+  onChange,
+  placeholder = "Search by name, #, ability, or move...",
+}: SearchBarProps) {
   return (
     <div className="relative">
       <Search

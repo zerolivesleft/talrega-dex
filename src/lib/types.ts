@@ -13,6 +13,8 @@ export interface PokemonListItem {
   baseTotal: number;
   types: { slot: number; type: { id: number; name: string; color: string; textColor: string } }[];
   abilities: { slot: number; isHidden: boolean; ability: { name: string } }[];
+  /** Present on full dex list from `getAllPokemon` for client search by move name. */
+  moves?: { move: { name: string } }[];
 }
 
 // A mon node in an evolution chain (may carry its own chain links)

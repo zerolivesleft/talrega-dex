@@ -34,7 +34,8 @@ export function DexBrowser({ pokemon, types }: DexBrowserProps) {
         !search ||
         p.name.toLowerCase().includes(q) ||
         String(p.dexNumber).includes(q) ||
-        p.abilities.some((a) => a.ability.name.toLowerCase().includes(q));
+        p.abilities.some((a) => a.ability.name.toLowerCase().includes(q)) ||
+        (p.moves?.some((m) => m.move.name.toLowerCase().includes(q)) ?? false);
       if (activeTypes.length === 0) return matchesSearch;
       const pokemonTypeNames = p.types.map((t) => t.type.name);
       const matchesType = matchAll

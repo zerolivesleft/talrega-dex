@@ -50,6 +50,9 @@ export async function getAllPokemon(): Promise<PokemonListItem[]> {
         include: { ability: { select: { name: true } } },
         orderBy: { slot: "asc" },
       },
+      moves: {
+        select: { move: { select: { name: true } } },
+      },
     },
   });
   return pokemon as unknown as PokemonListItem[];
@@ -103,7 +106,16 @@ export async function searchPokemon(
   const pokemon = await prisma.pokemon.findMany({
     where: {
       AND: [
-        q ? { OR: [{ name: { contains: q } }, { slug: { contains: q } }] } : {},
+        q
+          ? {
+              OR: [
+                { name: { contains: q } },
+                { slug: { contains: q } },
+                { abilities: { some: { ability: { name: { contains: q } } } } },
+                { moves: { some: { move: { name: { contains: q } } } } },
+              ],
+            }
+          : {},
         typeFilter && typeFilter.length > 0
           ? { types: { some: { type: { name: { in: typeFilter } } } } }
           : {},
